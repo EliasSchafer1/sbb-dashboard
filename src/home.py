@@ -63,6 +63,27 @@ top_10_lines = top_10_lines.rename(columns={"strecke_bezeichnung": "Top_10_Strec
 st.bar_chart(data=top_10_lines, x = "Top_10_Strecken", y= ["personenzuege_2025", "gueterzuege_2025"], stack=True)
 
 
+#-------------------------------------------------
+
+@st.dialog("New Train Line Added")
+def add_data(strecke_bezeichnung):
+    st.write("You added the new train line ", strecke_bezeichnung, " into the dataframe.")
+    if st.button('OK'):
+        st.rerun()
+
+st.subheader("Input Additional Data")
+with st.form("new_train_line"):
+    st.write("Here you can add data from a new train line into the dataframe.")
+
+    strecke_bezeichnung = st.text_input('Strecke Bezeichnung', key = "strecke")
+    abschnitt = st.text_input('Abschnitt', key = "abschnitt")
+
+    submitted = st.form_submit_button('Submit')
+
+if(submitted):
+    add_data(strecke_bezeichnung)
+
+
 #Müll
 #st.map(data=total_trains_per_month, latitude=None, longitude=None)
 #fig, ax = plt.subplots()
