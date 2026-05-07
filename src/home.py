@@ -19,8 +19,8 @@ if "stations_df" not in st.session_state:
     st.session_state.stations_df = extract_stations_df(trains_df = trains_df)  
 stations_df = st.session_state.stations_df
 
-st.dataframe(stations_df)
 
+# web page
 
 st.title("SBB Trains per Route")
 st.write("Here you can explore a real-life dataset from SBB.")
@@ -104,7 +104,7 @@ st.bar_chart(data=top_10_lines, x = "Top_10_Strecken", y= ["personenzuege_2025",
 # input new data into the dataframe
 #-----------------------------------
 
-
+# return true if the bezeichnung is valid
 def validate_strecke_bezeichnung(strecke_bezeichnung):
     if(len(strecke_bezeichnung)<2):
         return False, "Streckenbezeichnung muss mindestens 2 Buchstaben haben."
@@ -112,11 +112,10 @@ def validate_strecke_bezeichnung(strecke_bezeichnung):
         return False, "Streckenbezeichnung darf keine Sonderzeichen enthalten." 
     return True, ""
 
-def validate_abschnitt(abschnitt):
-    if(len(abschnitt)<2):
-        return False, "Abschnittbezeichnung muss mindestens 2 Buchstaben haben."
-    if('.' in abschnitt):
-        return False, "Abschnittbezeichnung darf keine Sonderzeichen enthalten." 
+#return true if it is a valid abschnitt
+def validate_abschnitt(station_from, station_to):
+    if station_from == station_to:
+        return False, "Anfangs- und Endstation müssen verschieden sein."
     return True, ""
 
 @st.dialog("New Train Line Added")
@@ -128,21 +127,27 @@ def success_dialog():
 
 st.subheader("Input Additional Data")
 
-#first row in the form: specify the line
+#specify the name of the line
+strecke_bezeichnung = st.text_input('Strecke Bezeichnung', placeholder = "Solothurn - Olten")
+if strecke_bezeichnung: 
+    is_valid, message = validate_strecke_bezeichnung(strecke_bezeichnung=strecke_bezeichnung)
+    if not is_valid:
+        st.error(message)
+
+#first row in the form: specify the line start and endpointss
 col11, col12 = st.columns(2)
 with col11:
-    strecke_bezeichnung = st.text_input('Strecke Bezeichnung', placeholder = "Solothurn - Olten")
-    if strecke_bezeichnung: 
-        is_valid, message = validate_strecke_bezeichnung(strecke_bezeichnung=strecke_bezeichnung)
-        if not is_valid:
-            st.error(message)
+    station_from = st.selectbox("Abschnitt von", stations_df)
+    station_from_row = stations_df[stations_df["station"] == station_from]
 
 with col12:
-    abschnitt = st.text_input('Abschnitt', placeholder = "Niederbipp - Oensingen")
-    if abschnitt:
-        is_valid, message = validate_abschnitt(abschnitt=abschnitt)
-        if not is_valid:
-            st.error(message)
+    station_to = st.selectbox("Abschnitt bis", stations_df)
+    station_to_row = stations_df[stations_df["station"] == station_to]
+
+if station_from and station_to:
+    is_valid, message = validate_abschnitt(station_from, station_to)
+    if not is_valid:
+        st.error(message)
 
 col21, col22 = st.columns(2)
 #second row in the form: month and year
@@ -171,7 +176,7 @@ if st.button("Submit"):
     #validate all fields
     validations = [
         validate_strecke_bezeichnung(strecke_bezeichnung),
-        validate_abschnitt(abschnitt)
+        validate_abschnitt(station_from, station_to),
     ]
     if all(v[0] for v in validations):
 
@@ -185,8 +190,14 @@ if st.button("Submit"):
             dtv_g_vorjahr = pd.NA
             dtv_vorjahr = pd.NA
 
+        #arrays with the coordinates
+        station_to_coordinates = [float(station_to_row.iloc[0]["longitude"]), float(station_to_row.iloc[0]["latitude"])]
+        station_from_coordinates = [float(station_from_row.iloc[0]["longitude"]), float(station_from_row.iloc[0]["latitude"])]
+
         new_row = {"strecke_bezeichnung": strecke_bezeichnung,
-                "abschnitt": abschnitt,
+                "abschnitt": "{} – {}".format(station_from, station_to),
+                "abschnitt_von": station_from_row.iloc[0]["label"],
+                "abschnitt_bis": station_to_row.iloc[0]["label"],
                 "bezugsmonat": bezugsmonat,
                 "vorjahresmonat": vorjahresmonat,
                 "dtv_bezugsmonat": dtv_p + dtv_g,
@@ -195,7 +206,8 @@ if st.button("Submit"):
                 "dtv_vorjahresmonat": dtv_vorjahr,
                 "dtv_p_vorjahresmonat": dtv_p_vorjahr,
                 "dtv_g_vorjahresmonat": dtv_g_vorjahr,
-                "hat_vorjahresmonat": hat_vorjahresmonat}
+                "hat_vorjahresmonat": hat_vorjahresmonat,
+                "verbindung": {"coordinates": [station_from_coordinates, station_to_coordinates], "type": "LineString"}}
         trains_df = pd.concat([trains_df, pd.DataFrame([new_row])], ignore_index = True)
 
         success_dialog()
