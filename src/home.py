@@ -12,11 +12,10 @@ trains_raw_df = load_data()
 
 if "trains_df" not in st.session_state:
     st.session_state.trains_df = clean_data(trains_raw_df)
-trains_df = st.session_state.trains_df
 
 
 if "stations_df" not in st.session_state:
-    st.session_state.stations_df = extract_stations_df(trains_df = trains_df)  
+    st.session_state.stations_df = extract_stations_df(trains_df = st.session_state.trains_df)  
 stations_df = st.session_state.stations_df
 
 
@@ -26,14 +25,14 @@ st.title("SBB Trains per Route")
 st.write("Here you can explore a real-life dataset from SBB.")
 
 st.subheader("Preview")
-st.dataframe(trains_df)
+st.dataframe(st.session_state.trains_df)
 
 st.subheader("Dataset information")
-st.write("Rows:", trains_df.shape[0])
-st.write("Columns:", trains_df.shape[1])
+st.write("Rows:", st.session_state.trains_df.shape[0])
+st.write("Columns:", st.session_state.trains_df.shape[1])
 
 st.subheader("Missing values per column")   #show data that the user might want to impute
-st.write(trains_df.isna().sum())
+st.write(st.session_state.trains_df.isna().sum())
 
 st.subheader("Handle Missing Values")
 
@@ -53,14 +52,14 @@ if st.button("Fill missing previous-year values (mean)"):
     st.success("Missing values filled")
     st.rerun()
 
-st.write(trains_df.dtypes)
+st.write(st.session_state.trains_df.dtypes)
 
 
 st.header("Train Traffic Overview")
 #Barplot of Trains per month
 st.subheader("Passenger and Freight Trains in 2025")
 st.write("This chart compares the monthly number of passenger and freight trains in 2025.")
-total_trains_per_month = trains_df.groupby("bezugsmonat").agg(
+total_trains_per_month = st.session_state.trains_df.groupby("bezugsmonat").agg(
     zuege_total_2025 = ("dtv_bezugsmonat", "sum"),
     personenzuege_2025 = ("dtv_p_bezugsmonat", "sum"),
     gueterzuege_2025 =("dtv_g_bezugsmonat", "sum")
@@ -72,14 +71,14 @@ st.bar_chart(data=total_trains_per_month, x = "Monate", y = ["personenzuege_2025
 #Histogramm distribution of average number trains per line
 st.subheader("Average Number of Trains per Route")
 st.write("This chart shows the average number of trains per route in 2025.")
-avg_number_trains_per_line = trains_df.groupby("strecke_bezeichnung")["dtv_bezugsmonat"].mean().reset_index()
+avg_number_trains_per_line = st.session_state.trains_df.groupby("strecke_bezeichnung")["dtv_bezugsmonat"].mean().reset_index()
 avg_number_trains_per_line = avg_number_trains_per_line.rename(columns = {"strecke_bezeichnung": "Strecken", "dtv_bezugsmonat": "zuege_total_2025"})
 st.bar_chart(data=avg_number_trains_per_line, x = "Strecken", y = "zuege_total_2025")
 
 #Linediagram of trains_2025 compare to trains_2024
 st.subheader("Train Traffic Comparison: 2025 vs. 2024")
 st.write("This line chart compares the total number of trains per month in 2025 with the same months in 2024.")
-compare_months = trains_df.groupby("bezugsmonat").agg(
+compare_months = st.session_state.trains_df.groupby("bezugsmonat").agg(
     zuege_total_2025 = ("dtv_bezugsmonat", "sum"),
     zuege_total_2024 = ("dtv_vorjahresmonat", "sum")
 ).reset_index()
@@ -90,7 +89,7 @@ st.line_chart(data=compare_months, x = "Monate", y = ["zuege_total_2025", "zuege
 #Barplot of Trains of top_10_lines
 st.subheader("Passenger and Freight Trains on the Top 10 Routes")
 st.write("This chart shows the distribution of passenger and freight trains on the ten busiest routes in 2025.")
-top_10_lines = trains_df.groupby("strecke_bezeichnung").agg(
+top_10_lines = st.session_state.trains_df.groupby("strecke_bezeichnung").agg(
     zuege_total_2025 = ("dtv_bezugsmonat", "sum"),
     personenzuege_2025 = ("dtv_p_bezugsmonat", "sum"),
     gueterzuege_2025 = ("dtv_g_bezugsmonat", "sum")
@@ -121,7 +120,7 @@ def validate_abschnitt(station_from, station_to):
 @st.dialog("New Train Line Added")
 def success_dialog():
     st.write("Success! The new row was added to the dataframe.")
-    trains_df.loc[len(trains_df)-1]
+    st.session_state.trains_df.loc[len(st.session_state.trains_df)-1]
     if st.button('OK'):
         st.rerun()
 
@@ -208,8 +207,8 @@ if st.button("Submit"):
                 "dtv_g_vorjahresmonat": dtv_g_vorjahr,
                 "hat_vorjahresmonat": hat_vorjahresmonat,
                 "verbindung": {"coordinates": [station_from_coordinates, station_to_coordinates], "type": "LineString"}}
-        trains_df = pd.concat([trains_df, pd.DataFrame([new_row])], ignore_index = True)
-
+        
+        st.session_state.trains_df = pd.concat([st.session_state.trains_df, pd.DataFrame([new_row])], ignore_index = True)
         success_dialog()
     else:
         #show all error messages
