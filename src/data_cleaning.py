@@ -25,9 +25,8 @@ def clean_data(df):
     df = df.drop(columns=["bemerkung"])
 
     # Splitting months into two different columns and converting to date_time
-    df[["bezugsmonat", "vorjahresmonat"]] = df["bezugsmonat_vorjahresmonat"].str.split(" :: ", expand=True)
-    df["bezugsmonat"] = pd.to_datetime(df["bezugsmonat"]).dt.to_period("M")
-    df["vorjahresmonat"] = pd.to_datetime(df["vorjahresmonat"]).dt.to_period("M")
+    df["bezugsmonat"] = df["bezugsmonat_vorjahresmonat"].str.split(" :: ", expand=True)[0]
+    df["bezugsmonat"] = pd.to_datetime(df["bezugsmonat"]).dt.month
     df = df.drop(columns=["bezugsmonat_vorjahresmonat"])
     
     # Reorder the columns to get a meaningful order
@@ -39,7 +38,6 @@ def clean_data(df):
         "abschnitt_bis",
         # Time
         "bezugsmonat",
-        "vorjahresmonat",
         # Metrics
         "dtv_bezugsmonat",
         "dtv_vorjahresmonat",
