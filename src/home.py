@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from preprocessing import extract_stations_df
 from streamlit_folium import st_folium
 from map_maker import draw_map
+import plotly.express as px
 
 # Pre-processing
 # Store cleaned dataframe in session_state so user changes such as 
@@ -122,23 +123,27 @@ with col14:
 data_sel = "bezugsmonat" if selected_year == 2025 else "vorjahresmonat"
 data_sel = types_to_prefix[train_type]+data_sel
 filtered = trains_df[trains_df["abschnitt"].isin(selected_sections)].copy()
+plot_args = {
+    "x": "bezugsmonat",
+    "y": "zuege_total",
+    "markers": True
+}
 if metric == metrics[0]:
     compare_months = (
         filtered
-        .groupby(["bezugsmonat", "abschnitt"], as_index=False)
+        .groupby(["bezugsmonat", "abschnitt"])
         .agg(zuege_total=(data_sel, "sum"))
-    )
-    chart_data = compare_months.pivot(
-        index="bezugsmonat",
-        columns="abschnitt",
-        values="zuege_total"
-    )
-    st.line_chart(chart_data)
-else:
-    compare_months = filtered.groupby("bezugsmonat").agg(
-        zuege_total = (data_sel, metric.lower()),
     ).reset_index()
-    st.line_chart(data=compare_months, x = "bezugsmonat", y = "zuege_total")
+    plot_args["color"] = "abschnitt"
+else:
+    compare_months = (
+        filtered
+        .groupby("bezugsmonat")
+        .agg(zuege_total = (data_sel, metric.lower()))
+    ).reset_index()
+# Make plot
+fig = px.line(compare_months, **plot_args)
+st.plotly_chart(fig, width="stretch")
 
 #Barplot of Trains of top_10_lines
 st.subheader("Passenger and Freight Trains on the Top 10 Routes")
