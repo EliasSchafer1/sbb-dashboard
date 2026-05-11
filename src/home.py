@@ -93,12 +93,6 @@ st.write("This line chart shows the monthly train traffic per selected section f
 # Summe oder Durchschnitt der ausgewählten Stationen, alle Stationen gleichzeitig
 # Auswählen zwischen dtv, dtv_p oder dtv_g
 col11, col12, col13, col14 = st.columns(4)
-# User specifies the stations
-with col11:
-    selected_sections = st.multiselect(
-        "Abschnitte auswählen",
-        options=sorted(trains_df["abschnitt"].unique()),
-    )
 # User specifies the year
 with col12:
     selected_year = st.selectbox(
@@ -122,6 +116,17 @@ with col14:
     )
 data_sel = "bezugsmonat" if selected_year == 2025 else "vorjahresmonat"
 data_sel = types_to_prefix[train_type]+data_sel
+# User specifies the stations
+with col11:
+    valid_abschnitte = (
+        trains_df.groupby("abschnitt")[data_sel]
+        .filter(lambda x: x.notna().all())
+        .index
+    )
+    selected_sections = st.multiselect(
+        "Abschnitte auswählen",
+        options=sorted(trains_df.loc[valid_abschnitte, "abschnitt"].unique()),
+    )
 filtered = trains_df[trains_df["abschnitt"].isin(selected_sections)].copy()
 plot_args = {
     "x": "bezugsmonat",
