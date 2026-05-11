@@ -293,6 +293,8 @@ if st.button("Submit"):
                 }
         
         trains_df = pd.concat([trains_df, pd.DataFrame([new_row])], ignore_index = True)
+        trains_df = trains_df.convert_dtypes()
+        st.session_state.trains_df = trains_df
         success_dialog()
     else:
         #show all error messages
