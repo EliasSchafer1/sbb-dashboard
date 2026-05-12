@@ -13,17 +13,76 @@ from main import trains_df
 sbb_header("Home SBB Trains per Month")
 
 # web page
-st.write("Here you can explore a real-life dataset from SBB.")
+st.set_page_config(layout="wide")
+st.write("Welcome on the Dashbord of the Project SBB Trains Per Month! " \
+"Here you can explore a real-life dataset from SBB " \
+"containing the number of passenger and freight trains for each train line in Switzerland. " \
+"The data is up to date with full information about 2025 and partial information about 2024. " \
+"Have fun!")
+st.space("large")
 
-st.subheader("Preview")
-st.dataframe(trains_df)
+c1, c2, c3 = st.columns(3)
+c1.metric("Rows", trains_df.shape[0])
+c2.metric("Columns", trains_df.shape[1])
+c3.metric("Missing values", trains_df.isna().sum().sum())
+st.space("large")
 
-st.subheader("Dataset information")
-st.write("Rows:", trains_df.shape[0])
-st.write("Columns:", trains_df.shape[1])
 
-st.subheader("Missing values per column")   #show data that the user might want to impute
-st.write(trains_df.isna().sum())
+c1, c2 = st.columns([3, 1], gap = "large")
+with c1:
+    st.subheader("Preview")
+    st.dataframe(trains_df)
+with c2:
+    st.subheader("Missing Values")
+    st.write(trains_df.isna().sum())
+st.space("large")
+
+
+c1, c2 = st.columns(2, gap = "large")
+#Barplot of Trains per month
+with c1: 
+    st.subheader("Passenger and Freight Trains in 2025")
+    st.write("This chart compares the monthly number of passenger and freight trains in 2025.")
+    total_trains_per_month = trains_df.groupby("bezugsmonat").agg(
+        zuege_total_2025 = ("dtv_bezugsmonat", "sum"),
+        personenzuege_2025 = ("dtv_p_bezugsmonat", "sum"),
+        gueterzuege_2025 =("dtv_g_bezugsmonat", "sum")
+    ).reset_index()
+    total_trains_per_month = total_trains_per_month.sort_values("bezugsmonat")
+    st.bar_chart(data=total_trains_per_month, x = "bezugsmonat", y = ["personenzuege_2025", "gueterzuege_2025"], stack = True)
+
+with c2:
+    #Histogramm distribution of average number trains per line
+    st.subheader("Average Number of Trains per Route")
+    st.write("This chart shows the average number of trains per route in 2025.")
+    avg_number_trains_per_line = trains_df.groupby("strecke_bezeichnung")["dtv_bezugsmonat"].mean().reset_index()
+    avg_number_trains_per_line = avg_number_trains_per_line.rename(columns = {"strecke_bezeichnung": "Strecken", "dtv_bezugsmonat": "zuege_total_2025"})
+    st.bar_chart(data=avg_number_trains_per_line, x = "Strecken", y = "zuege_total_2025")
+
+with c1:
+    #Linediagram of trains_2025 compare to trains_2024
+    st.subheader("Train Traffic Comparison: 2025 vs. 2024")
+    st.write("This line chart compares the total number of trains per month in 2025 with the same months in 2024.")
+    compare_months = trains_df.groupby("bezugsmonat").agg(
+        zuege_total_2025 = ("dtv_bezugsmonat", "sum"),
+        zuege_total_2024 = ("dtv_vorjahresmonat", "sum")
+    ).reset_index()
+    compare_months = compare_months.sort_values("bezugsmonat")
+    st.line_chart(data=compare_months, x = "bezugsmonat", y = ["zuege_total_2025", "zuege_total_2024"])
+
+with c2:
+    #Barplot of Trains of top_10_lines
+    st.subheader("Top 10 lines")
+    st.write("This chart shows the distribution of passenger and freight trains on the ten busiest routes in 2025.")
+    top_10_lines = trains_df.groupby("strecke_bezeichnung").agg(
+        zuege_total_2025 = ("dtv_bezugsmonat", "sum"),
+        personenzuege_2025 = ("dtv_p_bezugsmonat", "sum"),
+        gueterzuege_2025 = ("dtv_g_bezugsmonat", "sum")
+    ).reset_index()
+    top_10_lines = top_10_lines.sort_values("zuege_total_2025", ascending=False).head(10)
+    top_10_lines = top_10_lines.rename(columns={"strecke_bezeichnung": "Top_10_Strecken"})
+    st.bar_chart(data=top_10_lines, x = "Top_10_Strecken", y= ["personenzuege_2025", "gueterzuege_2025"], stack=True)
+st.space("large")
 
 st.subheader("Handle Missing Values")
 
@@ -44,47 +103,3 @@ if st.button("Fill missing previous-year values (mean)"):
     st.rerun()
 
 st.dataframe(trains_df.dtypes.astype(str))
-
-st.header("Train Traffic Overview")
-#Barplot of Trains per month
-st.subheader("Passenger and Freight Trains in 2025")
-st.write("This chart compares the monthly number of passenger and freight trains in 2025.")
-total_trains_per_month = trains_df.groupby("bezugsmonat").agg(
-    zuege_total_2025 = ("dtv_bezugsmonat", "sum"),
-    personenzuege_2025 = ("dtv_p_bezugsmonat", "sum"),
-    gueterzuege_2025 =("dtv_g_bezugsmonat", "sum")
-).reset_index()
-total_trains_per_month = total_trains_per_month.sort_values("bezugsmonat")
-st.bar_chart(data=total_trains_per_month, x = "bezugsmonat", y = ["personenzuege_2025", "gueterzuege_2025"], stack = True)
-
-#Histogramm distribution of average number trains per line
-st.subheader("Average Number of Trains per Route")
-st.write("This chart shows the average number of trains per route in 2025.")
-avg_number_trains_per_line = trains_df.groupby("strecke_bezeichnung")["dtv_bezugsmonat"].mean().reset_index()
-avg_number_trains_per_line = avg_number_trains_per_line.rename(columns = {"strecke_bezeichnung": "Strecken", "dtv_bezugsmonat": "zuege_total_2025"})
-st.bar_chart(data=avg_number_trains_per_line, x = "Strecken", y = "zuege_total_2025")
-
-#Linediagram of trains_2025 compare to trains_2024
-st.subheader("Train Traffic Comparison: 2025 vs. 2024")
-st.write("This line chart compares the total number of trains per month in 2025 with the same months in 2024.")
-compare_months = trains_df.groupby("bezugsmonat").agg(
-    zuege_total_2025 = ("dtv_bezugsmonat", "sum"),
-    zuege_total_2024 = ("dtv_vorjahresmonat", "sum")
-).reset_index()
-compare_months = compare_months.sort_values("bezugsmonat")
-st.line_chart(data=compare_months, x = "bezugsmonat", y = ["zuege_total_2025", "zuege_total_2024"])
-
-
-#Barplot of Trains of top_10_lines
-st.subheader("Passenger and Freight Trains on the Top 10 Routes")
-st.write("This chart shows the distribution of passenger and freight trains on the ten busiest routes in 2025.")
-top_10_lines = trains_df.groupby("strecke_bezeichnung").agg(
-    zuege_total_2025 = ("dtv_bezugsmonat", "sum"),
-    personenzuege_2025 = ("dtv_p_bezugsmonat", "sum"),
-    gueterzuege_2025 = ("dtv_g_bezugsmonat", "sum")
-).reset_index()
-top_10_lines = top_10_lines.sort_values("zuege_total_2025", ascending=False).head(10)
-top_10_lines = top_10_lines.rename(columns={"strecke_bezeichnung": "Top_10_Strecken"})
-st.bar_chart(data=top_10_lines, x = "Top_10_Strecken", y= ["personenzuege_2025", "gueterzuege_2025"], stack=True)
-
-

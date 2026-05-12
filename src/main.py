@@ -6,12 +6,10 @@ from preprocessing import extract_stations_df
 with open("style.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-
 #define pages
 home = st.Page("home.py", title="Home", icon="🚂")
 explore = st.Page("explore.py", title="Explore", icon="🚝" )
 modify = st.Page("modify.py", title="Modify", icon="🚝" )
-
 
 # Pre-processing
 # Store cleaned dataframe in session_state so user changes such as 
