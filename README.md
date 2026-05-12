@@ -28,7 +28,7 @@ poetry install
 
 ### 4. Run the project:
 ```
-poetry run streamlit run src/home.py
+poetry run streamlit run src/main.py
 ```
 
 ## Example usage

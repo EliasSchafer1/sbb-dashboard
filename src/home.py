@@ -9,6 +9,52 @@ from streamlit_folium import st_folium
 from map_maker import draw_map
 import plotly.express as px
 
+#layout
+from pathlib import Path
+import base64
+import streamlit as st
+
+def image_to_base64(path):
+    return base64.b64encode(Path(path).read_bytes()).decode()
+
+train_img = image_to_base64("src/train.png")
+
+st.markdown(
+    f"""
+    <style>
+    .sbb-hero {{
+        height: 120px;
+        background: #e00000;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 32px;
+        margin: -48px -48px 32px -48px;
+        color: white;
+    }}
+
+    .sbb-hero h1 {{
+        font-size: 34px;
+        margin: 0;
+        font-weight: 700;
+    }}
+
+    .sbb-hero img {{
+        height: 95px;
+        object-fit: contain;
+        transform: translateY(5.8px);
+    }}
+    </style>
+
+    <div class="sbb-hero">
+        <h1>SBB Trains per Route</h1>
+        <img src="data:image/png;base64,{train_img}" alt="Train">
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+
 # Pre-processing
 # Store cleaned dataframe in session_state so user changes such as 
 # added rows or imputed values are kept during the current session.
@@ -25,7 +71,7 @@ stations_df = st.session_state.stations_df
 
 # web page
 
-st.title("SBB Trains per Route")
+
 st.write("Here you can explore a real-life dataset from SBB.")
 
 st.subheader("Preview")
