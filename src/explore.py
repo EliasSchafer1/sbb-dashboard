@@ -5,7 +5,6 @@ from map_maker import draw_map
 import plotly.express as px
 from home import trains_df
 
-
 # Linechart of monthly average of trains in 2025
 st.subheader("Monthly train traffic")
 st.write("This line chart shows the monthly train traffic per selected section for the selected year.")

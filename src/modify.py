@@ -8,6 +8,7 @@ import pandas as pd
 import json
 from home import stations_df
 
+
 def validate_strecke_bezeichnung(strecke_bezeichnung):
     if(len(strecke_bezeichnung)<2):
         return False, "Streckenbezeichnung muss mindestens 2 Buchstaben haben."
