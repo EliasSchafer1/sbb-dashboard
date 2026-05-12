@@ -1,12 +1,11 @@
-#-----------------------------------
-# input new data into the dataframe
-#-----------------------------------
-
-# return true if the bezeichnung is valid
 import streamlit as st
 import pandas as pd
 import json
 from home import stations_df
+from layout import sbb_header
+
+#display sbb header
+sbb_header("Modify the Dataframe")
 
 
 def validate_strecke_bezeichnung(strecke_bezeichnung):

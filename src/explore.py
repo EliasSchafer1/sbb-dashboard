@@ -4,6 +4,10 @@ from streamlit_folium import st_folium
 from map_maker import draw_map
 import plotly.express as px
 from home import trains_df
+from layout import sbb_header
+
+# display sbb header
+sbb_header("Explore the Dataframe")
 
 # Linechart of monthly average of trains in 2025
 st.subheader("Monthly train traffic")
