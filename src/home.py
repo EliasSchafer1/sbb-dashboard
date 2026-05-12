@@ -9,50 +9,42 @@ from streamlit_folium import st_folium
 from map_maker import draw_map
 import plotly.express as px
 
-#layout
-from pathlib import Path
-import base64
-import streamlit as st
+# SBB style layout (written assisted by AI)
+st.markdown("""
+<style>
 
-def image_to_base64(path):
-    return base64.b64encode(Path(path).read_bytes()).decode()
+/* Full-width SBB-style header */
+.sbb-hero {
+    width: 100vw;
+    height: 150px;
 
-train_img = image_to_base64("src/train.png")
+    background: #e00000;
 
-st.markdown(
-    f"""
-    <style>
-    .sbb-hero {{
-        height: 120px;
-        background: #e00000;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 32px;
-        margin: -48px -48px 32px -48px;
-        color: white;
-    }}
+    display: flex;
+    align-items: center;
 
-    .sbb-hero h1 {{
-        font-size: 34px;
-        margin: 0;
-        font-weight: 700;
-    }}
+    padding-left: 48px;
 
-    .sbb-hero img {{
-        height: 95px;
-        object-fit: contain;
-        transform: translateY(5.8px);
-    }}
-    </style>
+    color: white;
 
-    <div class="sbb-hero">
-        <h1>SBB Trains per Route</h1>
-        <img src="data:image/png;base64,{train_img}" alt="Train">
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+    margin-left: calc(-50vw + 50%);
+    box-sizing: border-box;
+}
+
+.sbb-hero h1 {
+    font-size: 34px;
+    font-weight: 700;
+    margin: 0;
+}
+
+</style>
+
+<div class="sbb-hero">
+    <h1>SBB Trains per Route Dataframe</h1>
+</div>
+""", unsafe_allow_html=True)
+
+st.space("large")
 
 
 # Pre-processing

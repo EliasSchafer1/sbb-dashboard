@@ -1,7 +1,7 @@
 [theme]
 base = "light"
 
-primaryColor = "#ff0000"
+primaryColor = "#EB0000" #SBB color
 backgroundColor = "#ffffff"
 secondaryBackgroundColor = "#f0f2f6"
 textColor = "#000000"
