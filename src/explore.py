@@ -98,4 +98,98 @@ data_sel = types_to_prefix[train_type]+data_sel
 map_trains = draw_map(trains_df, data_sel=data_sel)
 st_folium(map_trains, width=700)
 
+#############################################
 
+st.subheader("Comparison of Train Traffic in 2024 and 2025")
+st.write("This map visualizes the difference in train traffic between 2024 and 2025.")
+
+col11, col12 = st.columns(2)
+
+# User specifies the train type
+train_types = ["All types", "Passenger trains", "Freight trains"]
+types_to_prefix = {"All types":"dtv_", "Passenger trains":"dtv_p_", "Freight trains":"dtv_g_"}
+with col12:
+    train_type = st.radio(
+        "Train type",
+        train_types,
+        key="type2_select_traffic"
+    )
+
+data_sel = "bezugsmonat" if selected_year == 2025 else "vorjahresmonat"
+data_sel = types_to_prefix[train_type]+data_sel
+
+# User specifies the stations
+with col11:
+    valid_abschnitte = (
+        trains_df.groupby("abschnitt")[data_sel]
+        .filter(lambda x: x.notna().all())
+        .index
+    )
+    selected_section = st.selectbox(
+        "Abschnitt auswählen",
+        options=sorted(trains_df.loc[valid_abschnitte, "abschnitt"].unique()),
+        key="explore_abschnitt_select_2",
+    )
+
+#filter for selected data
+filtered = trains_df[trains_df["abschnitt"] == selected_section].copy()
+plot_args = {
+    "x": "bezugsmonat",
+    "y": "zuege_total",
+    "markers": True
+}
+if metric == metrics[0]:
+    compare_months = (
+        filtered
+        .groupby(["bezugsmonat", "abschnitt"])
+        .agg(zuege_total=(data_sel, "sum"))
+    ).reset_index()
+    plot_args["color"] = "abschnitt"
+else:
+    compare_months = (
+        filtered
+        .groupby("bezugsmonat")
+        .agg(zuege_total = (data_sel, metric.lower()))
+    ).reset_index()
+
+
+prefix = types_to_prefix[train_type]
+
+#group by months
+compare_years = filtered.groupby("bezugsmonat").agg(
+    value_2025=(prefix + "bezugsmonat", "sum"),
+    value_2024=(prefix + "vorjahresmonat", "sum"),
+).reset_index()
+
+# Transform dataframe from wide format to long format
+compare_years_long = compare_years.melt(
+    id_vars="bezugsmonat",
+    value_vars=["value_2025", "value_2024"],
+    var_name="year",
+    value_name="zuege_total"
+)
+
+#replace labels
+compare_years_long["year"] = compare_years_long["year"].replace({
+    "value_2025": "2025",
+    "value_2024": "2024"
+})
+
+#creating barplot
+fig_bar = px.bar(
+    compare_years_long,
+    x="bezugsmonat",
+    y="zuege_total",
+    color="year",
+    barmode="group",
+    color_discrete_map={
+        "2024": "#F67469",
+        "2025": "#D50000"
+    }
+)
+#make plot
+st.plotly_chart(
+    fig_bar,
+    use_container_width=True,
+    key="traffic_barplot",
+)
