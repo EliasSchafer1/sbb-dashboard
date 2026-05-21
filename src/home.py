@@ -52,7 +52,7 @@ with c1:
     fig = px.bar(total_trains_per_month, x = "bezugsmonat", y = ["personenzuege_2025", "gueterzuege_2025"], barmode="stack", color_discrete_map={
         "personenzuege_2025": "#F67469", "gueterzuege_2025": "#D50000"
     })
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 #Barplot of Trains per month 2024
 with c2: 
@@ -67,7 +67,7 @@ with c2:
     fig = px.bar(total_trains_per_month, x = "bezugsmonat", y = ["personenzuege_2024", "gueterzuege_2024"], barmode="stack", color_discrete_map={
         "personenzuege_2024": "#F67469", "gueterzuege_2024": "#D50000"
     })
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 with c1:
     #Barplot of Trains of top_10_lines
@@ -83,7 +83,7 @@ with c1:
     fig = px.bar(top_10_lines, x = "Top_10_Strecken", y= ["personenzuege_2025", "gueterzuege_2025"],  barmode="stack", color_discrete_map={
         "personenzuege_2025": "#F67469", "gueterzuege_2025": "#D50000"
     })
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
     st.space("large")
 
 with c2:
@@ -93,7 +93,7 @@ with c2:
     avg_number_trains_per_line = trains_df.groupby("strecke_bezeichnung")["dtv_bezugsmonat"].mean().reset_index()
     avg_number_trains_per_line = avg_number_trains_per_line.rename(columns = {"strecke_bezeichnung": "Strecken", "dtv_bezugsmonat": "zuege_total_2025"})
     fig = px.bar(avg_number_trains_per_line, x = "Strecken", y = "zuege_total_2025", color_discrete_sequence=["#D50000"])
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 
 st.subheader("Handle Missing Values")
