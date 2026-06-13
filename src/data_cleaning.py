@@ -24,9 +24,24 @@ def clean_data(df):
     df["hat_vorjahresmonat"] = df["bemerkung"].isna()
     df = df.drop(columns=["bemerkung"])
 
-    # Splitting months into two different columns and converting to date_time
-    df["bezugsmonat"] = df["bezugsmonat_vorjahresmonat"].str.split(" :: ", expand=True)[0]
-    df["bezugsmonat"] = pd.to_datetime(df["bezugsmonat"]).dt.month
+    # Splitting months into two different columns and converting to datetime
+    df["bezugsmonat"] = pd.to_datetime(
+        df["bezugsmonat_vorjahresmonat"].str.split(" :: ", expand=True)[0]
+    )
+
+    df["month_num"] = df["bezugsmonat"].dt.month
+
+    month_order = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ]
+
+    df["bezugsmonat"] = pd.Categorical(
+        df["bezugsmonat"].dt.month_name(),
+        categories=month_order,
+        ordered=True
+    )
+
     df = df.drop(columns=["bezugsmonat_vorjahresmonat"])
     
     # Reorder the columns to get a meaningful order
@@ -38,6 +53,7 @@ def clean_data(df):
         "abschnitt_bis",
         # Time
         "bezugsmonat",
+        "month_num",
         # Metrics
         "dtv_bezugsmonat",
         "dtv_vorjahresmonat",
