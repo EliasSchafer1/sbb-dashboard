@@ -2,8 +2,10 @@ import streamlit as st
 from streamlit_folium import st_folium
 from map_maker import draw_map
 import plotly.express as px
-from main import trains_df
+from data_store import get_trains_df
 from layout import sbb_header
+
+trains_df = get_trains_df()
 
 # display sbb header
 sbb_header("Explore the Dataframe")

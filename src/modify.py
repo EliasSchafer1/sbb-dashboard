@@ -1,8 +1,11 @@
 import streamlit as st
 import pandas as pd
 import json
-from main import trains_df, stations_df
+from data_store import get_stations_df, get_trains_df
 from layout import sbb_header
+
+trains_df = get_trains_df()
+stations_df = get_stations_df()
 
 #display sbb header
 sbb_header("Modify the Dataframe")

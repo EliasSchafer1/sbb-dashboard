@@ -7,13 +7,12 @@ from streamlit_folium import st_folium
 from map_maker import draw_map
 import plotly.express as px
 from layout import sbb_header
-from main import trains_df
+from data_store import get_trains_df
+
+trains_df = get_trains_df()
 
 #display sbb header
 sbb_header("Home SBB Trains per Month")
-
-# web page
-st.set_page_config(layout="wide")
 st.write("Welcome on the Dashbord of the Project SBB Trains Per Month! " \
 "Here you can explore a real-life dataset from SBB " \
 "containing the number of passenger and freight trains for each train line in Switzerland. " \
