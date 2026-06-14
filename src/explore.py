@@ -25,7 +25,7 @@ with col12:
         key="year_select_traffic"
     )
 with col13:
-    metrics = ["Separate", "Sum", "Mean"]
+    metrics = ["Separate", "Mean", "Sum"]
     metric = st.radio(
         "Metric",
         metrics
@@ -43,24 +43,21 @@ with col14:
         key="type_select_traffic"
     )
 data_sel = train_type_to_columns[train_type][0 if selected_year == 2025 else 1]
+trains_df_filtered = trains_df[trains_df[data_sel].notna()]
 # User specifies the sections
 with col11:
-    valid_sections = (
-        trains_df.groupby("section")[data_sel]
-        .filter(lambda x: x.notna().all())
-        .index
-    )
     selected_sections = st.multiselect(
         "Select Route Sections",
-        options=sorted(trains_df.loc[valid_sections, "section"].unique()),
+        options=sorted(trains_df_filtered["section"].unique()),
     )
-filtered = trains_df[trains_df["section"].isin(selected_sections)].copy()
+filtered = trains_df_filtered[trains_df_filtered["section"].isin(selected_sections)].copy()
 plot_args = {
     "x": "reference_month",
     "y": "total_trains",
     "labels" : {"reference_month":"Reference Month", "total_trains": "Average Daily Trains", "section" : "Route Section"},
     "markers": True
 }
+# Separate lines
 if metric == metrics[0]:
     compare_months = (
         filtered
@@ -68,7 +65,7 @@ if metric == metrics[0]:
         .agg(total_trains=(data_sel, "sum"))
     ).reset_index()
     plot_args["color"] = "section"
-else:
+else: # Other metric
     compare_months = (
         filtered
         .groupby("reference_month")
@@ -77,7 +74,16 @@ else:
 # Make plot
 fig = px.line(compare_months, **plot_args)
 st.plotly_chart(fig, width="stretch")
-
+# Check if any selected sections have a missing month
+incomplete = (
+    filtered
+    .groupby("section")[data_sel]
+    .count()
+    .lt(12)
+    .any()
+)
+if incomplete:
+    st.info("Some route sections have incomplete data for certain months. These are excluded from aggregations.")
 
 # Create map of all route sections
 st.subheader("Map of Route Sections")
