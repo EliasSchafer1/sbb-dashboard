@@ -3,6 +3,7 @@ import pandas as pd
 import json
 from data_store import get_stations_df, get_trains_df
 from layout import sbb_header
+import calendar
 
 trains_df = get_trains_df()
 stations_df = get_stations_df()
@@ -36,10 +37,9 @@ def success_dialog():
 # display the fields to enter the data
 #---------------------------------------
 
-#header
 st.subheader("Add a new route section to the dataframe")
 
-#first row in the form: specify the section start and endpoints
+# First row in the form: specify the section start and endpoints
 col11, col12 = st.columns(2)
 with col11:
     station_from = st.selectbox("Section from", stations_df)
@@ -54,17 +54,13 @@ if station_from and station_to:
     if not is_valid:
         st.error(message)
 
-#second row in the form: month
-month_num = int(st.selectbox("Month", list(range(1, 13))))
-
-month_names = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-]
-reference_month = month_names[month_num - 1]
+# Second row in the form: month
+month_names = list(calendar.month_name)[1:]  # ['January', 'February', ...]
+reference_month = st.selectbox("Month", month_names)
+month_num = list(calendar.month_name).index(reference_month)
 
 col31, col32 = st.columns(2)
-#third row in the form: number of trains
+# Third row in the form: number of trains
 with col31:
     daily_passenger_trains = st.number_input('Number of Passenger Trains', min_value = 0)
 with col32:
@@ -106,13 +102,12 @@ if st.button("Submit"):
                 "section_to": station_to_row.iloc[0]["label"],
                 "reference_month": reference_month,
                 "month_num": month_num,
-            "daily_trains": daily_passenger_trains + daily_freight_trains,
-            "daily_passenger_trains": daily_passenger_trains,
-            "daily_freight_trains": daily_freight_trains,
-            "daily_trains_py": daily_trains_py,
-            "daily_passenger_trains_py": daily_passenger_trains_py,
-            "daily_freight_trains_py": daily_freight_trains_py,
-                "has_previous_year_month": has_previous_year_month,
+                "daily_trains": daily_passenger_trains + daily_freight_trains,
+                "daily_passenger_trains": daily_passenger_trains,
+                "daily_freight_trains": daily_freight_trains,
+                "daily_trains_py": daily_trains_py,
+                "daily_passenger_trains_py": daily_passenger_trains_py,
+                "daily_freight_trains_py": daily_freight_trains_py,
                 "connection": json.dumps({
                     "coordinates": [station_from_coordinates, station_to_coordinates], 
                     "type": "LineString"
