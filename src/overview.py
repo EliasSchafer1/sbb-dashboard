@@ -11,7 +11,6 @@ from data_store import get_trains_df
 
 trains_df = get_trains_df()
 
-#display sbb header
 sbb_header("Home SBB Trains per Month")
 st.write("Welcome on the Dashboard of the Project SBB Trains Per Month! " \
 "Here you can explore a real-life dataset from SBB " \
@@ -25,14 +24,37 @@ c2.metric("Columns", trains_df.shape[1])
 c3.metric("Missing values", trains_df.isna().sum().sum())
 st.space("large")
 
+# dataframe preview
+st.subheader("Preview")
+st.dataframe(trains_df)
 
-c1, c2 = st.columns([3, 1], gap = "large")
+c1, c2 = st.columns(2, gap = "large")
 with c1:
-    st.subheader("Preview")
-    st.dataframe(trains_df)
-with c2:
     st.subheader("Missing Values")
     st.write(trains_df.isna().sum())
+with c2:
+    st.subheader("Impute Missing Values")
+
+    # fill missing previous-year values
+    if "filled" not in st.session_state:
+        st.session_state.filled = False
+
+    if st.session_state.filled:
+        st.info(f"Missing values have been imputed with the column {st.session_state.method.lower()}.")
+    else:
+        option = st.radio("Imputation method:", ["Mean", "Median"])
+        if st.button("Fill missing previous-year values (mean)"):
+            cols = [
+                "daily_trains_py",
+                "daily_passenger_trains_py",
+                "daily_freight_trains_py",
+            ]
+            for col in cols:
+                fill_value = trains_df[col].mean() if option == "Mean" else trains_df[col].median()
+                trains_df[col] = trains_df[col].fillna(fill_value)
+            st.session_state.filled = True
+            st.session_state.method = option
+            st.rerun()
 st.space("large")
 
 
@@ -93,25 +115,3 @@ for i, col in enumerate([c5, c6]):
         fig.update_traces(xbins=dict(start=0, size=30)) # Fixed size bins anchored at zero
         fig.update_xaxes(range=[0, avg_per_section[daily_trains_cols[i]].max() * 1.05], dtick=100)
         st.plotly_chart(fig, width="stretch")
-        
-
-
-st.subheader("Handle Missing Values")
-
-# fill missing previous-year train counts with column mean
-if st.button("Fill missing previous-year values (mean)"):
-    cols = [
-        "daily_trains_py",
-        "daily_passenger_trains_py",
-        "daily_freight_trains_py",
-    ]
-
-    for col in cols:
-        trains_df[col] = trains_df[col].fillna(
-            trains_df[col].mean()
-        )
-
-    st.success("Missing values filled")
-    st.rerun()
-
-st.dataframe(trains_df.dtypes.astype(str))
