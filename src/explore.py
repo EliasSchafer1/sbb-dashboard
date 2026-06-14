@@ -12,15 +12,15 @@ sbb_header("Explore the Dataframe")
 
 # Linechart of monthly average of trains in 2025
 st.subheader("Monthly train traffic")
-st.write("This line chart shows the monthly train traffic per selected section for the selected year.")
+st.write("This line chart shows the monthly train traffic per selected route section for the selected year.")
 
-# Summe oder Durchschnitt der ausgewählten Stationen, alle Stationen gleichzeitig
-# Auswählen zwischen dtv, dtv_p oder dtv_g
+# Sum or average of selected sections, all sections at the same time
+# Choose between dtv, dtv_p or dtv_g
 col11, col12, col13, col14 = st.columns(4)
 # User specifies the year
 with col12:
     selected_year = st.selectbox(
-        "Jahr auswählen",
+        "Select Year",
         options=[2024, 2025],
         key="year_select_traffic"
     )
@@ -38,52 +38,52 @@ with col14:
         train_types,
         key="type_select_traffic"
     )
-data_sel = "bezugsmonat" if selected_year == 2025 else "vorjahresmonat"
+data_sel = "reference_month" if selected_year == 2025 else "previous_year_month"
 data_sel = types_to_prefix[train_type]+data_sel
-# User specifies the stations
+# User specifies the sections
 with col11:
-    valid_abschnitte = (
-        trains_df.groupby("abschnitt")[data_sel]
+    valid_sections = (
+        trains_df.groupby("section")[data_sel]
         .filter(lambda x: x.notna().all())
         .index
     )
     selected_sections = st.multiselect(
-        "Abschnitte auswählen",
-        options=sorted(trains_df.loc[valid_abschnitte, "abschnitt"].unique()),
+        "Select Route Sections",
+        options=sorted(trains_df.loc[valid_sections, "section"].unique()),
     )
-filtered = trains_df[trains_df["abschnitt"].isin(selected_sections)].copy()
+filtered = trains_df[trains_df["section"].isin(selected_sections)].copy()
 plot_args = {
-    "x": "bezugsmonat",
-    "y": "zuege_total",
+    "x": "reference_month",
+    "y": "total_trains",
     "markers": True
 }
 if metric == metrics[0]:
     compare_months = (
         filtered
-        .groupby(["bezugsmonat", "abschnitt"])
-        .agg(zuege_total=(data_sel, "sum"))
+        .groupby(["reference_month", "section"])
+        .agg(total_trains=(data_sel, "sum"))
     ).reset_index()
-    plot_args["color"] = "abschnitt"
+    plot_args["color"] = "section"
 else:
     compare_months = (
         filtered
-        .groupby("bezugsmonat")
-        .agg(zuege_total = (data_sel, metric.lower()))
+        .groupby("reference_month")
+        .agg(total_trains = (data_sel, metric.lower()))
     ).reset_index()
 # Make plot
 fig = px.line(compare_months, **plot_args)
 st.plotly_chart(fig, width="stretch")
 
 
-# Create map of all routes
-st.subheader("Map of train routes")
+# Create map of all route sections
+st.subheader("Map of Route Sections")
 st.write("This map contains the mean monthly traffic from the selected year")
-# Auswählen zwischen dtv, dtv_p oder dtv_g
+# Choose between dtv, dtv_p or dtv_g
 col11, col12 = st.columns(2)
 # User specifies the year
 with col11:
     selected_year = st.selectbox(
-        "Jahr auswählen",
+        "Select Year",
         options=[2024, 2025],
         key="year_select_map"
     )
@@ -95,7 +95,7 @@ with col12:
         train_types,
         key="type_select_map"
     )
-data_sel = "bezugsmonat" if selected_year == 2025 else "vorjahresmonat"
+data_sel = "reference_month" if selected_year == 2025 else "previous_year_month"
 data_sel = types_to_prefix[train_type]+data_sel
 map_trains = draw_map(trains_df, data_sel=data_sel)
 st_folium(map_trains, width=700)
@@ -117,58 +117,58 @@ with col12:
         key="type2_select_traffic"
     )
 
-data_sel = "bezugsmonat" if selected_year == 2025 else "vorjahresmonat"
+data_sel = "reference_month" if selected_year == 2025 else "previous_year_month"
 data_sel = types_to_prefix[train_type]+data_sel
 
-# User specifies the stations
+# User specifies the sections
 with col11:
-    valid_abschnitte = (
-        trains_df.groupby("abschnitt")[data_sel]
+    valid_sections = (
+        trains_df.groupby("section")[data_sel]
         .filter(lambda x: x.notna().all())
         .index
     )
     selected_section = st.selectbox(
-        "Abschnitt auswählen",
-        options=sorted(trains_df.loc[valid_abschnitte, "abschnitt"].unique()),
-        key="explore_abschnitt_select_2",
+        "Select Route Section",
+        options=sorted(trains_df.loc[valid_sections, "section"].unique()),
+        key="explore_section_select_2",
     )
 
 #filter for selected data
-filtered = trains_df[trains_df["abschnitt"] == selected_section].copy()
+filtered = trains_df[trains_df["section"] == selected_section].copy()
 plot_args = {
-    "x": "bezugsmonat",
-    "y": "zuege_total",
+    "x": "reference_month",
+    "y": "total_trains",
     "markers": True
 }
 if metric == metrics[0]:
     compare_months = (
         filtered
-        .groupby(["bezugsmonat", "abschnitt"])
-        .agg(zuege_total=(data_sel, "sum"))
+        .groupby(["reference_month", "section"])
+        .agg(total_trains=(data_sel, "sum"))
     ).reset_index()
-    plot_args["color"] = "abschnitt"
+    plot_args["color"] = "section"
 else:
     compare_months = (
         filtered
-        .groupby("bezugsmonat")
-        .agg(zuege_total = (data_sel, metric.lower()))
+        .groupby("reference_month")
+        .agg(total_trains = (data_sel, metric.lower()))
     ).reset_index()
 
 
 prefix = types_to_prefix[train_type]
 
 #group by months
-compare_years = filtered.groupby("bezugsmonat").agg(
-    value_2025=(prefix + "bezugsmonat", "sum"),
-    value_2024=(prefix + "vorjahresmonat", "sum"),
+compare_years = filtered.groupby("reference_month").agg(
+    value_2025=(prefix + "reference_month", "sum"),
+    value_2024=(prefix + "previous_year_month", "sum"),
 ).reset_index()
 
 # Transform dataframe from wide format to long format
 compare_years_long = compare_years.melt(
-    id_vars="bezugsmonat",
+    id_vars="reference_month",
     value_vars=["value_2025", "value_2024"],
     var_name="year",
-    value_name="zuege_total"
+    value_name="total_trains"
 )
 
 #replace labels
@@ -180,8 +180,8 @@ compare_years_long["year"] = compare_years_long["year"].replace({
 #creating barplot
 fig_bar = px.bar(
     compare_years_long,
-    x="bezugsmonat",
-    y="zuege_total",
+    x="reference_month",
+    y="total_trains",
     color="year",
     barmode="group",
     color_discrete_map={

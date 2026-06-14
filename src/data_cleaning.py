@@ -48,7 +48,7 @@ def clean_data(df):
     df = df.drop(columns=["bezugsmonat_vorjahresmonat"])
     
     # Reorder the columns to get a meaningful order
-    cols = [
+    df = df[[
         # Identification
         "abschnitt",
         "abschnitt_von",
@@ -67,8 +67,23 @@ def clean_data(df):
         "hat_vorjahresmonat",
         # Geo data
         "verbindung",
-    ]
-    df = df[cols]
+    ]]
+
+    # Rename columns to English
+    df = df.rename(columns={
+        "abschnitt": "section",
+        "abschnitt_von": "section_from",
+        "abschnitt_bis": "section_to",
+        "bezugsmonat": "reference_month",
+        "dtv_bezugsmonat": "dtv_reference_month",
+        "dtv_vorjahresmonat": "dtv_previous_year_month",
+        "dtv_p_bezugsmonat": "dtv_p_reference_month",
+        "dtv_p_vorjahresmonat": "dtv_p_previous_year_month",
+        "dtv_g_bezugsmonat": "dtv_g_reference_month",
+        "dtv_g_vorjahresmonat": "dtv_g_previous_year_month",
+        "hat_vorjahresmonat": "has_previous_year_month",
+        "verbindung": "connection",
+    })
 
     return df
 

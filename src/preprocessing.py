@@ -4,7 +4,7 @@ import json
 # extracts all the stations from the sbb dataframe
 # returns dataframe of the form
 #  | station (string) | label (string) | latitude (float) | longitude (float) |
-#  |------------------|----------------|------------------|-------------------|
+#  |------------------|----------------|------------------|--------------------|  
 #  | Travers          | TR             | 46.94            | 6.67              |
 #
 # hint: latitude = Breitengrad (Nord - Süd), longitude = Längengrad (Ost- West)
@@ -19,16 +19,16 @@ def extract_stations_df(trains_df):
 
     for _, row in trains_df.iterrows():
 
-        #split abschnitt into two station names
-        station_from, station_to = row["abschnitt"].split(" – ")
+        #split section into two station names
+        station_from, station_to = row["section"].split(" – ")
 
         #add second station if not yet
         if(station_to not in extracted_stations):
             stations_rows.append({
                 "station": station_to,
-                "label": row["abschnitt_bis"],
-                "latitude": json.loads(row["verbindung"])["coordinates"][1][1],
-                "longitude": json.loads(row["verbindung"])["coordinates"][1][0],
+                "label": row["section_to"],
+                "latitude": json.loads(row["connection"])["coordinates"][1][1],
+                "longitude": json.loads(row["connection"])["coordinates"][1][0],
             })
 
             extracted_stations.add(station_to)
@@ -37,9 +37,9 @@ def extract_stations_df(trains_df):
         if(station_from not in extracted_stations):
             stations_rows.append({
                 "station": station_from,
-                "label": row["abschnitt_von"],
-                "latitude": json.loads(row["verbindung"])["coordinates"][0][1],
-                "longitude": json.loads(row["verbindung"])["coordinates"][0][0],
+                "label": row["section_from"],
+                "latitude": json.loads(row["connection"])["coordinates"][0][1],
+                "longitude": json.loads(row["connection"])["coordinates"][0][0],
             })
 
             extracted_stations.add(station_from)
