@@ -80,7 +80,8 @@ st.plotly_chart(fig, width="stretch")
 
 # Create map of all route sections
 st.subheader("Map of Route Sections")
-st.write("This map contains the mean monthly traffic from the selected year")
+st.write("This map shows the average daily number of trains for each route section, " \
+        "colored by traffic intensity.")
 # Choose between daily train categories
 col11, col12 = st.columns(2)
 # User specifies the year
@@ -99,7 +100,7 @@ with col12:
     )
 data_sel = train_type_to_columns[train_type][0 if selected_year == 2025 else 1]
 map_trains = draw_map(trains_df, data_sel=data_sel)
-st_folium(map_trains, width=700)
+st_folium(map_trains, width="100%", height=600)
 
 #############################################
 
