@@ -12,10 +12,8 @@ from data_store import get_trains_df
 trains_df = get_trains_df()
 
 sbb_header("Home SBB Trains per Month")
-st.write("Welcome on the Dashboard of the Project SBB Trains Per Month! " \
-"Here you can explore a real-life dataset from SBB " \
-"containing the number of passenger and freight trains for each SBB route section in Switzerland. " \
-"Have fun!")
+st.write("This dashboard provides an overview of daily train frequencies across SBB route sections in Switzerland, "\
+    "based on official SBB open data. Explore monthly averages for passenger and freight trains in 2024 and 2025.")
 st.space("large")
 
 c1, c2, c3 = st.columns(3)
