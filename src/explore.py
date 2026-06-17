@@ -21,7 +21,7 @@ train_type_to_columns = {
 
 # Linechart of monthly average of trains in 2025
 st.subheader("Monthly train traffic")
-st.write("This line chart shows the monthly train traffic per selected route section for the selected year.")
+st.write("Monthly average daily train traffic per selected route section for the selected year.")
 
 # Sum or average of selected sections, all sections at the same time
 # Choose between daily train categories
@@ -40,9 +40,9 @@ with col2:
         key="year_select_traffic"
     )
 with col3:
-    metrics = ["Separate", "Mean", "Sum"]
+    metrics = ["Show separately", "Total", "Average"]
     metric = st.radio(
-        "Metric",
+        "Aggregation across selected sections",
         metrics
     )
 with col4:
@@ -59,6 +59,10 @@ plot_args = {
     "labels" : {"reference_month":"Reference Month", "total_trains": "Average Daily Trains", "section" : "Route Section"},
     "markers": True
 }
+agg_map = {
+    "Total": "sum",
+    "Average": "mean"
+}
 # Separate lines
 if metric == metrics[0]:
     compare_months = (
@@ -71,7 +75,7 @@ else: # Other metric
     compare_months = (
         filtered
         .groupby("reference_month")
-        .agg(total_trains = (data_sel, metric.lower()))
+        .agg(total_trains = (data_sel, agg_map[metric]))
     ).reset_index()
 # Check if any selected sections have a missing month
 incomplete = (
@@ -85,12 +89,13 @@ if incomplete:
     st.info("Some route sections have incomplete data for certain months. These are excluded from aggregations.")
 # Make plot
 fig = px.line(compare_months, **plot_args)
+fig.update_yaxes(rangemode="tozero")
 st.plotly_chart(fig, width="stretch")
 
 ######################## Line chart of traffic comparison ############################
 
-st.subheader("Comparison of Train Traffic in 2024 and 2025")
-st.write("This chart compares the average daily train traffic for a selected route section between 2024 and 2025.")
+st.subheader("Comparison 2024-2025")
+st.write("Monthly average daily train traffic for a selected route section across 2024 and 2025.")
 
 col1, col2 = st.columns(2)
 
@@ -140,13 +145,14 @@ fig = px.line(
     labels={"reference_month": "Month", "total_trains": "Average Daily Trains", "year": "Year"},
     color_discrete_map={"2024": "#F67469", "2025": "#D50000"}
 )
+fig.update_yaxes(rangemode="tozero")
 st.plotly_chart(fig, width="stretch", key="traffic_lineplot")
 
 ######################## Map of route sections #########################
 
 # Create map of all route sections
-st.subheader("Map of Route Sections")
-st.write("This map shows the average daily number of trains for each route section, " \
+st.subheader("Route section traffic map")
+st.write("Average daily train traffic per route section over the selected year, "
         "colored by traffic intensity.")
 # Choose between daily train categories
 col1, col2 = st.columns(2)
