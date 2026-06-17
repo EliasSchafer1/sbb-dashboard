@@ -1,6 +1,6 @@
 # sbb-trains-per-route
 
-**Datascience FS26 - Project 03**: A reporting tool for the average number of trains per day for each section of the route network and month.
+Interactive EDA dashboard for average daily train frequencies across SBB route sections by month (2024–2025)
 
 ## Requirements
 
@@ -33,10 +33,17 @@ poetry run streamlit run src/main.py
 
 ## Example usage
 
-(To be updated, this is how the final version could look like)
-1. Select "Zurich" as departure
-2. Select "Bern" as arrival
-3. View the number of trains per route displayed in the dashboard
+1. Go to the Explore tab.
+2. Scroll to the graph “Comparison of Train Traffic in 2024 and 2025”.
+3. Select the route sections:
+   * Gotthard Nord (Spw) – Airolo
+   * Rynächt (Abzw) – Sedrun SMF
+4. Compare the traffic patterns of both route sections.
+
+You will observe that the traffic patterns of these two sections are strongly complementary, with a clear shift around late summer 2024.
+
+This is due to the reopening of the Gotthard Base Tunnel, which restored the normal routing between Rynächt and Sedrun and shifted traffic away from the alternative corridor via Airolo.
+
 
 ## Data
 
@@ -47,7 +54,6 @@ Data status: April 2026
 
 ## Group Members
 
-* Linus Bucher
 * Nora Lüthi
 * Elias Schafer
 * Jasmin Studer
