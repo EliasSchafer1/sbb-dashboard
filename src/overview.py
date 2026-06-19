@@ -78,7 +78,7 @@ for i, col in enumerate([c1, c2]):
         ).reset_index()
         fig = px.bar(avg_per_month, x="reference_month", y=["passenger_trains", "freight_trains"],
                      barmode="stack",
-                     labels={"reference_month":"Reference Month","value": "Average Daily Trains", "variable": "Train Type"},
+                     labels={"reference_month":"Month","value": "Average Daily Trains", "variable": "Train Type"},
                      color_discrete_map={"passenger_trains": "#F67469", "freight_trains": "#D50000"})
         st.plotly_chart(fig, width="stretch")
 
@@ -97,7 +97,7 @@ for i, col in enumerate([c3, c4]):
         top_10 = top_10.sort_values("avg_trains", ascending=False).head(10)
         fig = px.bar(top_10, x="section", y=["passenger_trains", "freight_trains"],
                      barmode="stack",
-                     labels={"value": "Average Daily Trains", "variable": "Train Type"},
+                     labels={"value": "Average Daily Trains", "variable": "Train Type", "section": "Section"},
                      color_discrete_map={"passenger_trains": "#F67469", "freight_trains": "#D50000"})
         st.plotly_chart(fig, width="stretch")
 

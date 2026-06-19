@@ -32,7 +32,8 @@ with col1:
     selected_sections = st.multiselect(
         "Select Route Sections",
         options=sorted(trains_df["section"].unique()),
-        default=[sorted(trains_df["section"].unique())[0]]
+        default=[sorted(trains_df["section"].unique())[0]],
+        placeholder="Choose sections"
     )
 with col2:
     selected_year = st.selectbox(
@@ -64,7 +65,7 @@ filtered = trains_df[trains_df["section"].isin(selected_sections)].copy()
 plot_args = {
     "x": "reference_month",
     "y": "total_trains",
-    "labels" : {"reference_month":"Reference Month", "total_trains": "Average Daily Trains", "section" : "Route Section"},
+    "labels" : {"reference_month":"Month", "total_trains": "Average Daily Trains", "section" : "Route Section"},
     "markers": True
 }
 agg_map = {

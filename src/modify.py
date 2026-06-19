@@ -46,7 +46,8 @@ def success_dialog(trains_df):
 # display the fields to enter the data
 #---------------------------------------
 
-st.subheader("Add a new route section to the dataframe")
+st.subheader("Add a new route section")
+st.caption("Input is per month: average number of daily trains within the selected month.")
 
 # First row in the form: specify the section start and endpoints
 col11, col12 = st.columns(2)
@@ -71,17 +72,17 @@ month_num = list(calendar.month_name).index(reference_month)
 col31, col32 = st.columns(2)
 # Third row in the form: number of trains
 with col31:
-    daily_passenger_trains = st.number_input('Number of Passenger Trains', min_value = 0)
+    daily_passenger_trains = st.number_input('Passenger Trains (2025)', min_value = 0)
 with col32:
-    daily_freight_trains = st.number_input('Number of Freight Trains', min_value = 0)
+    daily_freight_trains = st.number_input('Freight Trains (2025)', min_value = 0)
 
 #fourth row in the form: number of trains in the year before
 has_previous_year_month = st.checkbox("Previous Year Data Available")
 col41, col42 = st.columns(2)
 with col41:
-    daily_passenger_trains_py = st.number_input('Number of Passenger Trains in Previous Year Month', min_value = 0, disabled = not has_previous_year_month)
+    daily_passenger_trains_py = st.number_input('Passenger Trains (2024)', min_value = 0, disabled = not has_previous_year_month)
 with col42:
-    daily_freight_trains_py = st.number_input('Number of Freight Trains in Previous Year Month', min_value = 0, disabled = not has_previous_year_month)
+    daily_freight_trains_py = st.number_input('Freight Trains (2024)', min_value = 0, disabled = not has_previous_year_month)
 
 
 #-------------------------------------------------------------------
