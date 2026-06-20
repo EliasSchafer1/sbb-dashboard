@@ -7,10 +7,6 @@ from branca.element import Element
 import numpy as np
 import pandas as pd
 
-# Pre-processing
-# Store cleaned dataframe in session_state so user changes such as 
-# added rows or imputed values are kept during the current session.
-
 def draw_map(trains_df, data_sel):
     map_df = (
         trains_df

@@ -1,6 +1,7 @@
 from datetime import date
 import streamlit as st
 import pandas as pd
+import numpy as np
 import json
 import matplotlib.pyplot as plt
 from streamlit_folium import st_folium
@@ -104,16 +105,31 @@ for i, col in enumerate([c3, c4]):
 # Distribution of Average Daily Trains
 st.subheader("Distribution of Average Daily Trains")
 st.write("This histogram shows the distribution of average daily trains across all route sections.")
+# Option for log, since data-distribution is right-skewed
+log_scale = st.toggle("Log scale (x-axis)")
 c5, c6 = st.columns(2, gap="large")
 for i, col in enumerate([c5, c6]):
     with col:
         st.markdown(f"**{years[i]}**")
         avg_per_section = trains_df.groupby("section")[daily_trains_cols[i]].mean().reset_index()
-        fig = px.histogram(avg_per_section, x=daily_trains_cols[i],
+        
+        if log_scale:
+            avg_per_section["log_value"] = np.log1p(avg_per_section[daily_trains_cols[i]])
+            fig = px.histogram(avg_per_section, x="log_value",
+                               nbins=60,
+                               color_discrete_sequence=["#D50000"],
+                               labels={"log_value": "Average Daily Trains"})
+            # Set tick labels to real values
+            tick_vals = [0, 10, 20, 50, 100, 200, 500, 1000, 2000]
+            tick_log = [np.log1p(v) for v in tick_vals]
+            fig.update_traces(hovertemplate="Route Sections: %{y}<extra></extra>") # Only show count, not bins because of log-values of bins
+            fig.update_xaxes(tickvals=tick_log, ticktext=[str(v) for v in tick_vals])
+        else:
+            fig = px.histogram(avg_per_section, x=daily_trains_cols[i],
                            nbins=60,
                            color_discrete_sequence=["#D50000"],
-                   labels={daily_trains_cols[i]: "Average Daily Trains"})
+                           labels={daily_trains_cols[i]: "Average Daily Trains"})
+            fig.update_traces(xbins=dict(start=0, size=30)) # Fixed size bins anchored at zero
+            fig.update_xaxes(range=[0, avg_per_section[daily_trains_cols[i]].max() * 1.05], dtick=100)
         fig.update_yaxes(title_text="Number of Route Sections")
-        fig.update_traces(xbins=dict(start=0, size=30)) # Fixed size bins anchored at zero
-        fig.update_xaxes(range=[0, avg_per_section[daily_trains_cols[i]].max() * 1.05], dtick=100)
         st.plotly_chart(fig, width="stretch")

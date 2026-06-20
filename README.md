@@ -39,12 +39,12 @@ poetry run streamlit run src/main.py
      • Gotthard Nord (Spw) – Airolo
      • Rynächt (Abzw) – Sedrun SMF
    - Set Train type to "Passenger trains"
-   - Keep Year and Aggregation at their default settings
+   - Keep Year, Aggregation and Smoothing at their default settings
 3. Compare the monthly traffic patterns of the selected route sections.
 
 You will observe that the traffic patterns of these two sections are strongly complementary, with a clear shift around late summer 2024.
 
-This is due to the reopening of the Gotthard Base Tunnel, which restored the normal routing between Rynächt and Sedrun and shifted traffic away from the alternative corridor via Airolo.
+This is due to the reopening of the Gotthard Base Tunnel, which restored the normal routing between Rynächt and Sedrun and shifted traffic away from the alternative route via Airolo.
 
 
 ## Data
