@@ -17,7 +17,7 @@ pyenv local 3.11.8
 
 ### 2. Clone repository:
 ```
-git clone https://github.com/python-data-science-2026/sbb-trains-per-route.git
+git clone https://github.com/EliasSchafer1/SBB-Train-Dashboard.git
 cd sbb-trains-per-route
 ```
 
