@@ -26,41 +26,66 @@ st.write("Monthly average daily train traffic per selected route section for the
 
 # Sum or average of selected sections, all sections at the same time
 # Choose between daily train categories
-col1, col2, col3, col4, col5 = st.columns(5)
+row1_col1, row1_col2, row1_col3 = st.columns((1, 2, 1))
+row2_col1, row2_col2, row2_col3 = st.columns(3)
 # User specifications
-with col1:
-    selected_sections = st.multiselect(
-        "Select Route Sections",
-        options=sorted(trains_df["section"].unique()),
-        default=[sorted(trains_df["section"].unique())[0]],
-        placeholder="Choose sections"
-    )
-with col2:
+with row1_col1:
     selected_year = st.selectbox(
         "Select Year",
         options=[2024, 2025],
         key="year_select_traffic"
     )
-with col3:
-    metrics = ["Show separately", "Total", "Average"]
-    metric = st.radio(
-        "Aggregation across selected sections",
-        metrics
-    )
-with col4:
+with row2_col1:
     train_type = st.radio(
         "Train type",
         train_types,
         key="type_select_traffic"
     )
-with col5:
+with row2_col2:
+    metrics = ["Show separately", "Total", "Average"]
+    metric = st.radio(
+        "Aggregation across selected sections",
+        metrics
+    )
+with row2_col3:
     smoothing = st.radio(
         "Smoothing",
         ["None", "3-month rolling mean"]
     )
-zoom_mode_1 = st.checkbox("Zoom y-axis into data", key="zoom_traffic_1")
+sort_options = ["Alphabet", "Variance"]
+with row1_col3:
+    sel_sort_option = st.radio(
+        "Sort sections by",
+        sort_options,
+        key="sort_sections_traffic"
+    )
+with row1_col2:
+    year_col = train_type_to_columns[train_type][0 if selected_year == 2025 else 1]
+    # Sort option selected by user
+    if sel_sort_option == sort_options[0]:
+        section_options = sorted(trains_df["section"].unique())
+    else:
+        section_variance = (
+            trains_df.groupby("section")[year_col]
+            .var()
+            .sort_values(ascending=False)
+        )
+        section_options = section_variance.index.tolist()
+        
+    default_value = [section_options[0]] if section_options else []
+    
+    selected_sections = st.multiselect(
+        "Select Route Sections",
+        options=section_options,
+        # Use default only once
+        default=default_value if "selected_sections_traffic" not in st.session_state else None,
+        placeholder="Choose sections",
+        key="selected_sections_traffic"
+    )    
 
 data_sel = train_type_to_columns[train_type][0 if selected_year == 2025 else 1]
+zoom_mode_1 = st.checkbox("Zoom y-axis into data", key="zoom_traffic_1")
+
 filtered = trains_df[trains_df["section"].isin(selected_sections)].copy()
 plot_args = {
     "x": "reference_month",
@@ -126,23 +151,51 @@ st.plotly_chart(fig, width="stretch")
 st.subheader("Comparison 2024-2025")
 st.write("Monthly average daily train traffic for a selected route section across 2024 and 2025.")
 
-col1, col2 = st.columns(2)
+col1, col2, col3 = st.columns((2, 1, 1))
 
-with col1:
-    selected_section = st.selectbox(
-        "Select Route Section",
-        options=sorted(trains_df["section"].unique()),
-        key="explore_section_select_2",
-    )
+sort_options_2 = ["Alphabet", "Largest mean relative difference", "Largest mean absolute difference"] 
 with col2:
+    sel_sort_option_2 = st.radio(
+        "Sort sections by",
+        options=sort_options_2,
+        key="sort_sections_comparison"
+    )
+with col3:
     train_type = st.radio(
         "Train type",
         train_types,
         key="type2_select_traffic"
     )
-zoom_mode_2 = st.checkbox("Zoom y-axis into data", key="zoom_traffic_2")
-
 current_year_col, previous_year_col = train_type_to_columns[train_type]
+with col1:
+    # Sort option selected by user
+    if sel_sort_option_2 == sort_options_2[0]:
+        section_options_2 = sorted(trains_df["section"].unique())
+    elif sel_sort_option_2 == sort_options_2[1]:
+        def safe_relative_diff(g):
+            epsilon = 1  # kleine Konstante um Division durch 0 zu vermeiden
+            diffs = (g[current_year_col] - g[previous_year_col]) / (g[previous_year_col] + epsilon)
+            return diffs.abs().mean()
+        rel_diff_per_section = (
+            trains_df.groupby("section")
+            .apply(safe_relative_diff)
+            .sort_values(ascending=False)
+        )
+        section_options_2 = rel_diff_per_section.index.tolist()
+    else:
+        diff_per_section = (
+            trains_df.groupby("section")
+            .apply(lambda g: (g[current_year_col] - g[previous_year_col]).abs().mean())
+            .sort_values(ascending=False)
+        )
+        section_options_2 = diff_per_section.index.tolist()
+    
+    selected_section = st.selectbox(
+        "Select Route Section",
+        options=section_options_2,
+        key="explore_section_select_2",
+    )
+zoom_mode_2 = st.checkbox("Zoom y-axis into data", key="zoom_traffic_2")
 
 # Filter and aggregate
 filtered = trains_df[trains_df["section"] == selected_section].copy()
