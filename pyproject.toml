@@ -1,11 +1,5 @@
 [project]
-name = "sbb-trains-per-route"
-version = "0.1.0"
-package-mode = false
-description = ""
-authors = [
-    {name = "EliasSchafer1",email = "117300663+EliasSchafer1@users.noreply.github.com"}
-]
+name = "sbb-train-dashboard"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
