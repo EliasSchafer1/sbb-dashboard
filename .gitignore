@@ -63,6 +63,7 @@ coverage.xml
 *.pot
 
 # Environments
+.python-version
 .env
 .venv
 env/
@@ -131,7 +132,3 @@ $RECYCLE.BIN/
 
 # Log files
 *.log
-
-# Local configuration files (optional, uncomment if you want to ignore local env vars)
-# .env.local
-# .env.development.local
